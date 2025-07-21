@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ফরেক্স ট্রেডিং সিগন্যাল বট</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #1e3c72;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #1e3c72;
+            min-width: 100px;
+        }
+
+        select, button {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, button:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 60, 114, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .signal-card {
+            border-left: 5px solid;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 20px;
+        }
+
+        .signal-buy { border-color: #28a745; background: rgba(40, 167, 69, 0.1); }
+        .signal-sell { border-color: #dc3545; background: rgba(220, 53, 69, 0.1); }
+        .signal-hold { border-color: #ffc107; background: rgba(255, 193, 7, 0.1); }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .signal-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .signal-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-buy { background: #28a745; }
+        .badge-sell { background: #dc3545; }
+        .badge-hold { background: #ffc107; color: #333; }
+
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .indicator {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .indicator-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .indicator-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .recommendations {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .recommendations h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .rec-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .rec-item:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #2a5298;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            border: 3px solid rgba(42, 82, 152, 0.3);
+            border-top: 3px solid #2a5298;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ai-insights {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .ai-insights h3 {
+            color: #17a2b8;
+            margin-bottom: 15px;
+        }
+
+        .ai-text {
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .chat-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .chat-response {
+            background: rgba(23, 162, 184, 0.1);
+            border-left: 4px solid #17a2b8;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .form-group label {
+                min-width: auto;
+            }
+            
+            .indicators-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 AI ট্রেডিং সিগন্যাল বট</h1>
+            <p>ফরেক্স ও কমোডিটি মার্কেট বিশ্লেষণ</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="form-group">
+                <label for="pair">ট্রেডিং পেয়ার:</label>
+                <select id="pair">
+                    {% for pair in pairs %}
+                    <option value="{{ pair }}" {% if pair == 'EUR/USD' %}selected{% endif %}>{{ pair }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeframe">টাইমফ্রেম:</label>
+                <select id="timeframe">
+                    {% for tf in timeframes %}
+                    <option value="{{ tf }}" {% if tf == '1h' %}selected{% endif %}>{{ tf }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <button class="btn" id="analyzeBtn">🔍 বিশ্লেষণ করুন</button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            মার্কেট বিশ্লেষণ করা হচ্ছে...
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <div class="signal-card" id="signalCard">
+                <div class="signal-header">
+                    <div class="signal-title" id="signalTitle"></div>
+                    <div class="signal-badge" id="signalBadge"></div>
+                </div>
+                
+                <div class="indicators-grid">
+                    <div class="indicator">
+                        <div class="indicator-label">বর্তমান মূল্য</div>
+                        <div class="indicator-value" id="currentPrice"></div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">EMA 50</div>
+                        <div class="indicator-value" id="ema50"></div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">RSI</div>
+                        <div class="indicator-value" id="rsi"></div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">MACD</div>
+                        <div class="indicator-value" id="macd"></div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">সাপোর্ট</div>
+                        <div class="indicator-value" id="support"></div>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-label">রেজিস্ট্যান্স</div>
+                        <div class="indicator-value" id="resistance"></div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h3>ট্রেডিং সুপারিশ</h3>
+                    <div class="rec-item">
+                        <span>এন্ট্রি পয়েন্ট:</span>
+                        <span id="entryPoint"></span>
+                    </div>
+                    <div class="rec-item">
+                        <span>স্টপ লস:</span>
+                        <span id="stopLoss"></span>
+                    </div>
+                    <div class="rec-item">
+                        <span>টেক প্রফিট:</span>
+                        <span id="takeProfit"></span>
+                    </div>
+                    <div class="rec-item">
+                        <span>রিস্ক রিওয়ার্ড:</span>
+                        <span id="riskReward"></span>
+                    </div>
+                </div>
+
+                <div class="ai-insights">
+                    <h3>🧠 AI বিশ্লেষণ</h3>
+                    <div class="ai-text" id="aiInsights"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <h3>💬 AI ট্রেডিং চ্যাট</h3>
+            <div class="chat-input-group">
+                <input type="text" class="chat-input" id="chatInput" placeholder="ট্রেডিং সম্পর্কে প্রশ্ন করুন...">
+                <button class="btn" id="chatBtn">পাঠান</button>
+            </div>
+            <div id="chatResponse"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const chatBtn = document.getElementById('chatBtn');
+        const chatInput = document.getElementById('chatInput');
+        const chatResponse = document.getElementById('chatResponse');
+
+        // Analyze button click
+        analyzeBtn.addEventListener('click', async () => {
+            const pair = document.getElementById('pair').value;
+            const timeframe = document.getElementById('timeframe').value;
+            
+            // Show loading
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = 'বিশ্লেষণ করা হচ্ছে...';
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ pair, timeframe })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('ত্রুটি: ' + data.error);
+                    return;
+                }
+                
+                // Update UI with results
+                updateResults(data);
+                
+            } catch (error) {
+                alert('বিশ্লেষণে সমস্যা হয়েছে: ' + error.message);
+            } finally {
+                // Hide loading
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = '🔍 বিশ্লেষণ করুন';
+            }
+        });
+
+        // Chat functionality
+        chatBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            
+            chatBtn.disabled = true;
+            chatBtn.textContent = 'পাঠানো হচ্ছে...';
+            chatInput.disabled = true;
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('চ্যাট ত্রুটি: ' + data.error);
+                    return;
+                }
+                
+                // Display chat response
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'chat-response';
+                responseDiv.innerHTML = `<strong>প্রশ্ন:</strong> ${message}<br><br><strong>উত্তর:</strong> ${data.response}`;
+                
+                chatResponse.appendChild(responseDiv);
+                chatInput.value = '';
+                
+                // Scroll to bottom
+                responseDiv.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                alert('চ্যাটে সমস্যা হয়েছে: ' + error.message);
+            } finally {
+                chatBtn.disabled = false;
+                chatBtn.textContent = 'পাঠান';
+                chatInput.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        function updateResults(data) {
+            // Debug: Show data source
+            console.log('Analysis data:', data);
+            
+            // Show warning if using simulated data
+            if (data.using_simulated) {
+                const warning = document.createElement('div');
+                warning.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px;';
+                warning.innerHTML = '⚠️ সতর্কতা: সিমুলেটেড ডেটা ব্যবহার করা হচ্ছে - রিয়েল টাইম মার্কেট ডেটা পাওয়া যায়নি';
+                document.getElementById('results').insertBefore(warning, document.getElementById('signalCard'));
+            }
+            
+            // Update signal card
+            const signalCard = document.getElementById('signalCard');
+            const signalTitle = document.getElementById('signalTitle');
+            const signalBadge = document.getElementById('signalBadge');
+            
+            signalTitle.textContent = `${data.pair} - ${data.timeframe}`;
+            signalBadge.textContent = data.signal;
+            
+            // Update card styling based on signal
+            signalCard.className = `signal-card signal-${data.signal.toLowerCase()}`;
+            signalBadge.className = `signal-badge badge-${data.signal.toLowerCase()}`;
+            
+            // Update indicators
+            document.getElementById('currentPrice').textContent = formatNumber(data.current_price);
+            document.getElementById('ema50').textContent = formatNumber(data.indicators.ema_50);
+            document.getElementById('rsi').textContent = formatNumber(data.indicators.rsi);
+            document.getElementById('macd').textContent = formatNumber(data.indicators.macd);
+            document.getElementById('support').textContent = formatNumber(data.indicators.support);
+            document.getElementById('resistance').textContent = formatNumber(data.indicators.resistance);
+            
+            // Update recommendations
+            document.getElementById('entryPoint').textContent = formatNumber(data.recommendations.entry);
+            document.getElementById('stopLoss').textContent = data.recommendations.stop_loss ? formatNumber(data.recommendations.stop_loss) : 'N/A';
+            document.getElementById('takeProfit').textContent = data.recommendations.take_profit ? formatNumber(data.recommendations.take_profit) : 'N/A';
+            document.getElementById('riskReward').textContent = data.recommendations.risk_reward ? `1:${data.recommendations.risk_reward.toFixed(2)}` : 'N/A';
+            
+            // Update AI insights
+            document.getElementById('aiInsights').textContent = data.ai_insights || 'AI বিশ্লেষণ লোড করা হচ্ছে...';
+            
+            // Show results
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function formatNumber(num) {
+            if (num == null) return 'N/A';
+            return parseFloat(num).toFixed(5);
+        }
+
+        // Auto-analyze on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                analyzeBtn.click();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
